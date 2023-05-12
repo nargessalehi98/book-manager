@@ -19,5 +19,17 @@ $ docker compose up
 
 To run the tests, `cd` into the directory where `manage.py` is:
 ```sh
-(env)$ python manage.py test 
+$ chmod u+x test.sh
+$ ./test.sh
+
+```
+
+
+## Celery log
+
+To see celery log, `cd` into the directory where `manage.py` is:
+```sh
+$ chmod u+x celery_run.sh
+$ ./celery_run.sh
+
 ```
