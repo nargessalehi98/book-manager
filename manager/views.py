@@ -8,6 +8,7 @@ from manager.models import Book
 from manager.serializer import BookSerializer, SpecificBookSerializer
 from django.db.models import Q
 from config.logger import log_warning
+from config.celery_tasks import CeleryTasks
 
 
 class BookDetailAPIView(APIView):
