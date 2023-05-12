@@ -1,0 +1,27 @@
+version: '3'
+services:
+  book-manager:
+    image: book-manager
+    command: python manage.py runserver 0.0.0.0:80
+    volumes:
+      - .:/book-manager
+    ports:
+      - "8000:80"
+    depends_on:
+      - redis
+    networks:
+      - bm-network
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data  
+    networks:
+      - bm-network
+
+networks:
+  bm-network:
+
+volumes:
+  redis-data:
