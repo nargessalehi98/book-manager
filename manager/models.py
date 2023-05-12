@@ -26,7 +26,7 @@ class Book(models.Model):
 
     def update_extra_info(self, num_pages, subjects, description, cover_imager_url):
         self.num_pages = num_pages
-        self.set_subject_list(subjects)
+        self.subjects = ','.join(subjects) if subjects else None
         self.description = description
         self.cover_image_url = cover_imager_url
         self.updated = True
