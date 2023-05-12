@@ -1,9 +1,13 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.views import APIView
+
+from config.utils import update_book_status
 from manager.models import Book
-from manager.serializer import BookSerializer
+from manager.serializer import BookSerializer, SpecificBookSerializer
 from django.db.models import Q
+from config.logger import log_warning
 
 
 class BookDetailAPIView(APIView):
@@ -12,10 +16,12 @@ class BookDetailAPIView(APIView):
         try:
             title = request.query_params.get('title')
             book = Book.objects.get(title=title)
+            if not book.is_updated():
+                update_book_status(book)
         except Book.DoesNotExist:
+            log_warning(Book.DoesNotExist)
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-        serializer = BookSerializer(book)
+        serializer = SpecificBookSerializer(book)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
@@ -30,7 +36,7 @@ class BookSearchAPIView(APIView):
 
         pub_date_query = request.GET.get('pub_date')
         if pub_date_query:
-            pub_dates = pub_date_query.split('-')
+            pub_dates = pub_date_query.split('_')
             if len(pub_dates) == 1:
                 queryset = queryset.filter(publication_date__exact=pub_dates[0])
             elif len(pub_dates) == 2:
@@ -52,10 +58,20 @@ class BookSearchAPIView(APIView):
             filters = [Q(subjects__icontains=subject) for subject in subjects]
             queryset = queryset.filter(*filters)
 
-        serializer = BookSerializer(instance=queryset, many=True)
+        for book in queryset:
+            if not book.is_updated():
+                update_book_status(book)
+        serializer = SpecificBookSerializer(instance=queryset, many=True)
         return Response(serializer.data)
 
 
 class BookList(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+
+    def list(self, request, *args, **kwargs):
+        for book in self.get_queryset():
+            if not book.is_updated():
+                update_book_status(book)
+        return super().list(request, *args, **kwargs)
