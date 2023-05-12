@@ -9,7 +9,7 @@ class CeleryTasks:
     @staticmethod
     @app.task
     def update_db():
-        books = Book.objects.get(updated=False)
+        books = Book.objects.filter(updated=False)
         for book in books:
             num_pages, subjects, description, cover_imager_url = get_book_extra_info(book.create_title_query())
             book.update_extra_info(num_pages, subjects, description, cover_imager_url)
