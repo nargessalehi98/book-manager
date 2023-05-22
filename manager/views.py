@@ -11,6 +11,11 @@ from config.logger import log_warning
 from config.celery_tasks import CeleryTasks
 
 
+# Do we need 3 different views for this? How do you make it better?
+# ViewSet (Retrive/List) --> Model --> Parse
+# Filter --> Range library
+# Pagination class
+
 class BookDetailAPIView(APIView):
 
     def get(self, request):
@@ -28,6 +33,7 @@ class BookDetailAPIView(APIView):
 
 class BookSearchAPIView(APIView):
 
+    # Any idea how you can make this code cleaner?
     def get(self, request, *args, **kwargs):
         queryset = Book.objects.all()
 
@@ -45,6 +51,7 @@ class BookSearchAPIView(APIView):
                     publication_date__range=[pub_dates[0], pub_dates[1]]
                 )
 
+        # price_query = request.GET.get('price__start', 'price__end')
         price_query = request.GET.get('price')
         if price_query:
             prices = price_query.split('-')
@@ -66,10 +73,12 @@ class BookSearchAPIView(APIView):
         return Response(serializer.data)
 
 
-class BookList(generics.ListAPIView):
+class BookList(generics.MoldeViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+    # filter =
+    # pagination_class =
 
     def list(self, request, *args, **kwargs):
         for book in self.get_queryset():

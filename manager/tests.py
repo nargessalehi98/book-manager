@@ -81,6 +81,7 @@ class BookSearchAPIViewTestCase(APITestCase):
                                          publication_date='2022-04-01',
                                          subjects='test,subject', price=20.00)
 
+    # How do you think we can make this part cleaner?
     def test_search_by_title(self):
         response = self.client.get('/manager/search/?title=Test')
         self.assertEqual(response.status_code, 200)

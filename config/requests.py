@@ -4,6 +4,10 @@ import requests
 from config.logger import log_error
 
 
+# How to make this code cleaner? Better design?
+# Test?
+# Client - Producer - Service
+
 def _send_request(url: str, headers: dict, payload: dict):
     r = requests.get(url, headers=headers, data=payload)
     if r.status_code != 200:

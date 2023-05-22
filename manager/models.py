@@ -1,5 +1,7 @@
 from django.db import models
 
+from config.celery_tasks import update_db_instance
+
 
 class Book(models.Model):
     title = models.CharField(max_length=255)
@@ -11,6 +13,11 @@ class Book(models.Model):
     num_pages = models.PositiveIntegerField(blank=True, null=True)
     subjects = models.CharField(blank=True, max_length=1000)
     updated = models.BooleanField(default=False)
+    task_id = models.CharField(max_length=255, blank=True, null=True)
+
+    # objects = models.Manager()
+    # not_update_objects = NotUpdateManager()
+    # fill up with is_updated = False
 
     def is_updated(self):
         return self.updated
@@ -31,3 +38,8 @@ class Book(models.Model):
         self.cover_image_url = cover_imager_url
         self.updated = True
         self.save()
+
+    def save(self):
+        task_id = update_db_instance.delay(self)
+        self.task_id = task_id
+        super().save()
